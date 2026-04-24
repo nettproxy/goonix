@@ -7,6 +7,7 @@ static inline unsigned char inb(unsigned short port) {
 }
 
 static unsigned char shift_pressed = 0;
+static unsigned char extended_key = 0;
 
 static const unsigned char keyboard_map[] = {
     0,  27, '1', '2', '3', '4', '5', '6',
@@ -42,7 +43,7 @@ static unsigned char shift_map(unsigned char c) {
     switch (c) {
         case '1': return '!';
         case '2': return '"';
-        case '3': return '§';
+        case '3': return '#';
         case '4': return '$';
         case '5': return '%';
         case '6': return '&';
@@ -82,6 +83,21 @@ unsigned char keyboard_get_key(void) {
     }
 
     unsigned char scancode = inb(0x60);
+    
+    if (scancode == 0xE0) {
+        extended_key = 1;
+        return 0;
+    }
+    
+    if (extended_key) {
+        extended_key = 0;
+        if (scancode == 0x4B) return 0x80;
+        if (scancode == 0x4D) return 0x81;
+        if (scancode == 0x48) return 0x82;
+        if (scancode == 0x50) return 0x83;
+        return 0;
+    }
+    
     if (scancode == 0x2A || scancode == 0x36) {
         shift_pressed = 1;
         return 0;

@@ -1,4 +1,4 @@
 void command_clear(void) {
-    extern void clear_screen(void);
-    clear_screen();
+    extern void video_clear_screen(void);
+    video_clear_screen();
 }
