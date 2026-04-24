@@ -1,0 +1,15 @@
+/build/*
+!/build/build.sh
+*.o
+*.bin
+*.iso
+*.img
+*.log
+
+/iso/boot/kernel.bin
+
+*~
+*.swp
+*.swo
+.DS_Store
+.vscode/
