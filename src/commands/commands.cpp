@@ -5,6 +5,7 @@
 
 #include "clear/clear.hpp"
 #include "hello/hello.hpp"
+#include "random/random.hpp"
 #include "reboot/reboot.hpp"
 #include "meminfo/meminfo.hpp"
 #include "halt/halt.hpp"
@@ -26,5 +27,6 @@ Command commands[] = {
     {"info", command_info, "Display CPU and system information"},
     {"clrtest", command_clrtest, "Print color test lines"},
     {"echo", command_echo, "Print a string"},
+    {"random", command_random, "Test"},
     {0, 0, 0}
 };

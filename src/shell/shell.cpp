@@ -16,6 +16,7 @@
 #include "../commands/meminfo/meminfo.cpp"
 #include "../commands/halt/halt.cpp"
 #include "../commands/clrtest/clrtest.cpp"
+#include "../commands/random/random.cpp"
 #include "../commands/info/info.cpp"
 #include "../commands/help/help.cpp"
 #include "../commands/echo/echo.cpp"
