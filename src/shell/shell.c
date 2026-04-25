@@ -14,6 +14,8 @@
 #include "../commands/reboot/reboot.c"
 #include "../commands/meminfo/meminfo.c"
 #include "../commands/halt/halt.c"
+#include "../commands/clrtest/clrtest.c"
+#include "../commands/info/info.c"
 
 /*           code                     */
 
@@ -92,6 +94,14 @@ static void process_command(const char *cmd) {
         command_meminfo();
         return;
     }
+    if (string_equals(cmd, "info")) {
+        command_info();
+        return;
+    }
+    if (string_equals(cmd, "clrtest")) {
+        command_clrtest();
+        return;
+    }
     if (*cmd != '\0') {
         video_print_string("Gng ts command was NOT found\n");
     }
@@ -108,10 +118,17 @@ void shell_init(unsigned int addr) {
 }
 
 void shell_run(void) {
+    video_set_color(VIDEO_COLOR_LIGHT_BLUE, VIDEO_COLOR_BLACK);
     video_print_string("   ___               _     \n  / __|___  ___ _ _ (_)_ __\n | (_ / _ \/ _ \\ ' \\| \\ \\ /\n  \\___\\___/\\___/_||_|_/\\_\\\n                           \n");
+    video_set_color_attr(VIDEO_COLOR_WHITE);
+    video_set_color(VIDEO_COLOR_LIGHT_GREEN, VIDEO_COLOR_BLACK);
     video_print_string("Developed by Carti from scratch");
+    video_set_color_attr(VIDEO_COLOR_WHITE);
     video_print_string("\n---------------------------------\n");
+    video_set_color_attr(VIDEO_COLOR_CYAN);
+    video_set_color(VIDEO_COLOR_LIGHT_GREEN, VIDEO_COLOR_BLACK);
     video_print_string("[github.com/nettproxy/Goonix]   \n\n");
+    video_set_color_attr(VIDEO_COLOR_WHITE);
     print_prompt();
 
     int line_start = video_get_cursor_pos();

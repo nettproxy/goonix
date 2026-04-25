@@ -2,6 +2,19 @@
 
 static unsigned short *video_memory = (unsigned short*)0xB8000;
 static int cursor_position = 0;
+static unsigned char video_color = 0x07;
+
+unsigned char video_get_color(void) {
+    return video_color;
+}
+
+void video_set_color(unsigned char fg, unsigned char bg) {
+    video_color = (unsigned char)((bg << 4) | (fg & 0x0F));
+}
+
+void video_set_color_attr(unsigned char attr) {
+    video_color = attr;
+}
 
 void video_init(void) {
     video_clear_screen();
@@ -9,7 +22,7 @@ void video_init(void) {
 
 void video_clear_screen(void) {
     for (int i = 0; i < 80 * 25; i++) {
-        video_memory[i] = (unsigned short)(' ') | ((unsigned short)0x07 << 8);
+        video_memory[i] = (unsigned short)(' ') | ((unsigned short)video_color << 8);
     }
     cursor_position = 0;
 }
@@ -31,18 +44,18 @@ void video_put_char(char c) {
         video_clear_screen();
     }
 
-    video_memory[cursor_position++] = (unsigned short)c | ((unsigned short)0x07 << 8);
+    video_memory[cursor_position++] = (unsigned short)c | ((unsigned short)video_color << 8);
 }
 
 void video_erase_char(void) {
     if (cursor_position > 0) {
         cursor_position--;
-        video_memory[cursor_position] = (unsigned short)(' ') | ((unsigned short)0x07 << 8);
+        video_memory[cursor_position] = (unsigned short)(' ') | ((unsigned short)video_color << 8);
     }
 }
 
 void video_draw_cursor(int visible) {
-    video_memory[cursor_position] = (unsigned short)(visible ? '_' : ' ') | ((unsigned short)0x07 << 8);
+    video_memory[cursor_position] = (unsigned short)(visible ? '_' : ' ') | ((unsigned short)video_color << 8);
 }
 
 void video_print_string(const char *str) {
@@ -55,10 +68,10 @@ void video_redraw_line(int line_start, const char *buffer, int length, int curso
     video_draw_cursor(0);
     
     for (int i = 0; i < length; i++) {
-        video_memory[line_start + i] = (unsigned short)buffer[i] | ((unsigned short)0x07 << 8);
+        video_memory[line_start + i] = (unsigned short)buffer[i] | ((unsigned short)video_color << 8);
     }
     for (int i = length; i < 64; i++) {
-        video_memory[line_start + i] = (unsigned short)(' ') | ((unsigned short)0x07 << 8);
+        video_memory[line_start + i] = (unsigned short)(' ') | ((unsigned short)video_color << 8);
     }
     cursor_position = line_start + cursor_pos;
     video_draw_cursor(1);

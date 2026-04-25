@@ -1,6 +1,9 @@
 void command_meminfo(void) {
     extern void video_print_string(const char *str);
     extern void video_print_number(unsigned int num);
+    extern unsigned char video_get_color(void);
+    extern void video_set_color(unsigned char fg, unsigned char bg);
+    extern void video_set_color_attr(unsigned char attr);
     extern unsigned long long total_memory;
     extern unsigned long long free_memory;
 
@@ -19,6 +22,9 @@ void command_meminfo(void) {
     unsigned int kernel_bytes = (unsigned int)((unsigned long)&kernel_end - (unsigned long)&kernel_start);
     used_mb = kernel_bytes >> 20;
 
+    unsigned char old_color = video_get_color();
+
+    video_set_color(2, 0);
     video_print_string("Total Memory: ");
     if (total_mb != 0) {
         video_print_number(total_mb);
@@ -29,6 +35,7 @@ void command_meminfo(void) {
         video_print_string("KB\n");
     }
 
+    video_set_color(4, 0);
     video_print_string("Used Memory: ");
     if (used_mb != 0) {
         video_print_number(used_mb);
@@ -39,6 +46,7 @@ void command_meminfo(void) {
         video_print_string("KB\n");
     }
 
+    video_set_color(1, 0);
     video_print_string("Reserved Memory: ");
     if (reserved_mb != 0) {
         video_print_number(reserved_mb);
@@ -48,4 +56,6 @@ void command_meminfo(void) {
         video_print_number(reserved_kb);
         video_print_string("KB\n");
     }
+
+    video_set_color_attr(old_color);
 }
