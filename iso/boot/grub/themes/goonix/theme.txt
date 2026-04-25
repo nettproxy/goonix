@@ -1,0 +1,14 @@
+desktop-color: "#1B1B1B"
+title-text: "Goonix Boot Menu"
+title-color: "#79A0C9"
+
++ boot_menu {
+    left = 20%
+    top = 40%
+    width = 60%
+    height = 40%
+    item_color = "#FFFFFF"
+    selected_item_color = "#79A0C9"
+    item_height = 24
+    item_padding = 5
+}

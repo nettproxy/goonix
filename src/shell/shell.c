@@ -2,11 +2,18 @@
 #include "../lib/video.h"
 #include "../lib/video.c"
 #include "../driver/keyboard/keyboard.c"
+#include <stdint.h>
+#include "../lib/multiboot.h"
+
+
 
 /*           commands                 */
 
 #include "../commands/clear/clear.c"
 #include "../commands/hello/hello.c"
+#include "../commands/reboot/reboot.c"
+#include "../commands/meminfo/meminfo.c"
+#include "../commands/halt/halt.c"
 
 /*           code                     */
 
@@ -18,6 +25,52 @@ static int string_equals(const char *a, const char *b) {
     return *a == *b;
 }
 
+
+void video_print_number(uint32_t num) {
+    char buf[32];
+    int i = 0;
+
+    if (num == 0) {
+        video_print_string("0");
+        return;
+    }
+
+    while (num > 0) {
+        buf[i++] = '0' + (num % 10);
+        num /= 10;
+    }
+
+    while (i--) {
+        char c[2] = {buf[i], 0};
+        video_print_string(c);
+    }
+}
+
+uint64_t total_memory = 0;
+uint64_t free_memory = 0;
+
+void parse_memory(multiboot_info_t *mb) {
+    if (!(mb->flags & (1 << 6))) {
+        return; // no mmap
+    }
+
+    uintptr_t addr = mb->mmap_addr;
+    uintptr_t end  = addr + mb->mmap_length;
+
+    while (addr < end) {
+        multiboot_mmap_entry_t *entry =
+            (multiboot_mmap_entry_t *)addr;
+
+        if (entry->type == 1) {
+            free_memory += entry->len;
+        }
+
+        total_memory += entry->len;
+
+        addr += entry->size + sizeof(entry->size);
+    }
+}
+
 static void process_command(const char *cmd) {
     if (string_equals(cmd, "clear")) {
         command_clear();
@@ -27,8 +80,20 @@ static void process_command(const char *cmd) {
         command_hello();
         return;
     }
+    if (string_equals(cmd, "reboot")) {
+        command_reboot();
+        return;
+    }
+    if (string_equals(cmd, "halt")) {
+        command_halt();
+        return;
+    }
+    if (string_equals(cmd, "meminfo")) {
+        command_meminfo();
+        return;
+    }
     if (*cmd != '\0') {
-        video_print_string("Unknown command\n");
+        video_print_string("Gng ts command was NOT found\n");
     }
 }
 
@@ -36,13 +101,17 @@ static void print_prompt(void) {
     video_print_string("> ");
 }
 
-void shell_init(void) {
+void shell_init(unsigned int addr) {
+    mb_info = (struct multiboot_info *)addr;
     video_init();
     keyboard_init();
 }
 
 void shell_run(void) {
     video_print_string("   ___               _     \n  / __|___  ___ _ _ (_)_ __\n | (_ / _ \/ _ \\ ' \\| \\ \\ /\n  \\___\\___/\\___/_||_|_/\\_\\\n                           \n");
+    video_print_string("Developed by Carti from scratch");
+    video_print_string("\n---------------------------------\n");
+    video_print_string("[github.com/nettproxy/Goonix]   \n\n");
     print_prompt();
 
     int line_start = video_get_cursor_pos();

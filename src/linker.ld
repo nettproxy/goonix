@@ -1,26 +1,32 @@
-/* linker.ld */
-
 ENTRY(_start)
 
-SECTIONS {
-    . = 0x100000;  /* 1mb bin */
+SECTIONS
+{
+    . = 1M;
+    kernel_start = .;
 
-    .text : {
+    /* Multiboot header MUST be first */
+    .multiboot ALIGN(4) : {
         *(.multiboot)
-        *(.text)
     }
 
-    .rodata : {
-        *(.rodata)
+    .text ALIGN(4) : {
+        *(.text*)
     }
 
-    .data : {
-        *(.data)
+    .rodata ALIGN(4) : {
+        *(.rodata*)
     }
 
-    .bss : {
-        *(.bss)
+    .data ALIGN(4) : {
+        *(.data*)
     }
+
+    .bss ALIGN(4) : {
+        *(COMMON)
+        *(.bss*)
+    }
+    kernel_end = .;
 
     /DISCARD/ : {
         *(.comment)
