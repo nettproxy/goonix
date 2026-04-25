@@ -1,6 +1,6 @@
-#include "../shell/shell.c"
+#include "../shell/shell.cpp"
 
-void kernel_main(unsigned int magic, unsigned int addr) {
+extern "C" void kernel_main(unsigned int magic, unsigned int addr) {
     multiboot_info_t *mb = (multiboot_info_t *)addr;
 
     parse_memory(mb);

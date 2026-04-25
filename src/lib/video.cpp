@@ -1,71 +1,86 @@
-#include "video.h"
+#include "video.hpp"
+
+namespace lib {
+namespace video {
 
 static unsigned short *video_memory = (unsigned short*)0xB8000;
 static int cursor_position = 0;
 static unsigned char video_color = 0x07;
 
-unsigned char video_get_color(void) {
+static void scroll_up() {
+    // Scroll all lines up by one
+    for (int i = 0; i < 80 * 24; i++) {
+        video_memory[i] = video_memory[i + 80];
+    }
+    // Clear the bottom line
+    for (int i = 80 * 24; i < 80 * 25; i++) {
+        video_memory[i] = (unsigned short)(' ') | ((unsigned short)video_color << 8);
+    }
+    cursor_position -= 80;
+}
+
+unsigned char get_color() {
     return video_color;
 }
 
-void video_set_color(unsigned char fg, unsigned char bg) {
+void set_color(unsigned char fg, unsigned char bg) {
     video_color = (unsigned char)((bg << 4) | (fg & 0x0F));
 }
 
-void video_set_color_attr(unsigned char attr) {
+void set_color_attr(unsigned char attr) {
     video_color = attr;
 }
 
-void video_init(void) {
-    video_clear_screen();
+void init() {
+    clear_screen();
 }
 
-void video_clear_screen(void) {
+void clear_screen() {
     for (int i = 0; i < 80 * 25; i++) {
         video_memory[i] = (unsigned short)(' ') | ((unsigned short)video_color << 8);
     }
     cursor_position = 0;
 }
 
-static void move_cursor_newline(void) {
+static void move_cursor_newline() {
     cursor_position += 80 - (cursor_position % 80);
     if (cursor_position >= 80 * 25) {
-        video_clear_screen();
+        scroll_up();
     }
 }
 
-void video_put_char(char c) {
+void put_char(char c) {
     if (c == '\n') {
         move_cursor_newline();
         return;
     }
 
     if (cursor_position >= 80 * 25) {
-        video_clear_screen();
+        scroll_up();
     }
 
     video_memory[cursor_position++] = (unsigned short)c | ((unsigned short)video_color << 8);
 }
 
-void video_erase_char(void) {
+void erase_char() {
     if (cursor_position > 0) {
         cursor_position--;
         video_memory[cursor_position] = (unsigned short)(' ') | ((unsigned short)video_color << 8);
     }
 }
 
-void video_draw_cursor(int visible) {
+void draw_cursor(int visible) {
     video_memory[cursor_position] = (unsigned short)(visible ? '_' : ' ') | ((unsigned short)video_color << 8);
 }
 
-void video_print_string(const char *str) {
+void print_string(const char *str) {
     for (int i = 0; str[i] != '\0'; i++) {
-        video_put_char(str[i]);
+        put_char(str[i]);
     }
 }
 
-void video_redraw_line(int line_start, const char *buffer, int length, int cursor_pos) {
-    video_draw_cursor(0);
+void redraw_line(int line_start, const char *buffer, int length, int cursor_pos) {
+    draw_cursor(0);
     
     for (int i = 0; i < length; i++) {
         video_memory[line_start + i] = (unsigned short)buffer[i] | ((unsigned short)video_color << 8);
@@ -74,13 +89,16 @@ void video_redraw_line(int line_start, const char *buffer, int length, int curso
         video_memory[line_start + i] = (unsigned short)(' ') | ((unsigned short)video_color << 8);
     }
     cursor_position = line_start + cursor_pos;
-    video_draw_cursor(1);
+    draw_cursor(1);
 }
 
-int video_get_cursor_pos(void) {
+int get_cursor_pos() {
     return cursor_position;
 }
 
-void video_set_cursor_pos(int pos) {
+void set_cursor_pos(int pos) {
     cursor_position = pos;
 }
+
+} // namespace video
+} // namespace lib

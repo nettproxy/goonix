@@ -1,41 +1,18 @@
-#include "keyboard.h"
+#include "keyboard.hpp"
 
-static inline unsigned char inb(unsigned short port) {
+namespace driver {
+namespace keyboard {
+
+unsigned char KeyboardDriver::shift_pressed = 0;
+unsigned char KeyboardDriver::extended_key = 0;
+
+inline unsigned char KeyboardDriver::inb(unsigned short port) {
     unsigned char value;
     asm volatile ("inb %1, %0" : "=a" (value) : "Nd" (port));
     return value;
 }
 
-static unsigned char shift_pressed = 0;
-static unsigned char extended_key = 0;
-
-static const unsigned char keyboard_map[] = {
-    0,  27, '1', '2', '3', '4', '5', '6',
-    '7', '8', '9', '0', '-', '=', '\b', '\t',
-    'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',
-    'o', 'p', '[', ']', '\n', 0,  'a', 's',
-    'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',
-    '\'', '`', 0,  '\\', 'z', 'x', 'c', 'v',
-    'b', 'n', 'm', ',', '.', '/', 0,  '*',
-    0,  ' ', 0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  '7',
-    '8', '9', '-', '4', '5', '6', '+', '1',
-    '2', '3', '0', '.', 0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0
-};
-
-void keyboard_init(void) {
-    (void)keyboard_map;
-}
-
-static unsigned char shift_map(unsigned char c) {
+unsigned char KeyboardDriver::shift_map(unsigned char c) {
     if (c >= 'a' && c <= 'z') {
         return c - 'a' + 'A';
     }
@@ -66,9 +43,9 @@ static unsigned char shift_map(unsigned char c) {
     }
 }
 
-unsigned char keyboard_scancode_to_ascii(unsigned char scancode) {
-    if (scancode < sizeof(keyboard_map)) {
-        unsigned char c = keyboard_map[scancode];
+unsigned char KeyboardDriver::scancode_to_ascii(unsigned char scancode) {
+    if (scancode < sizeof(KEYBOARD_MAP)) {
+        unsigned char c = KEYBOARD_MAP[scancode];
         if (shift_pressed) {
             return shift_map(c);
         }
@@ -77,7 +54,11 @@ unsigned char keyboard_scancode_to_ascii(unsigned char scancode) {
     return 0;
 }
 
-unsigned char keyboard_get_key(void) {
+void KeyboardDriver::init() {
+    (void)KEYBOARD_MAP; // This function is useless btw
+}
+
+unsigned char KeyboardDriver::get_key() {
     if (!(inb(0x64) & 1)) {
         return 0;
     }
@@ -110,5 +91,8 @@ unsigned char keyboard_get_key(void) {
         return 0;
     }
 
-    return keyboard_scancode_to_ascii(scancode);
+    return scancode_to_ascii(scancode);
 }
+
+} // namespace keyboard
+} // namespace driver

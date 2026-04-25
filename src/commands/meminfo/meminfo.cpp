@@ -1,12 +1,12 @@
-void command_meminfo(void) {
-    extern void video_print_string(const char *str);
-    extern void video_print_number(unsigned int num);
-    extern unsigned char video_get_color(void);
-    extern void video_set_color(unsigned char fg, unsigned char bg);
-    extern void video_set_color_attr(unsigned char attr);
-    extern unsigned long long total_memory;
-    extern unsigned long long free_memory;
+#include "meminfo.hpp"
+#include "../../lib/video.hpp"
 
+extern unsigned long long total_memory;
+extern unsigned long long free_memory;
+extern void video_print_number(unsigned int num);
+
+void command_meminfo(const char *args) {
+    (void)args;
     unsigned long long reserved_memory = 0;
     if (total_memory >= free_memory) {
         reserved_memory = total_memory - free_memory;

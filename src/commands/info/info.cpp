@@ -1,6 +1,11 @@
+#include "info.hpp"
 #include <stdint.h>
+#include "../../lib/utils/utils.hpp"
+#include "../../lib/video.hpp"
 
-static int cpuid_supported(void) {
+extern void video_print_number(unsigned int num);
+
+static int cpuid_supported() {
     uint32_t before;
     uint32_t after;
     __asm__ volatile(
@@ -66,29 +71,13 @@ static int contains_non_space(const char *s) {
     return 0;
 }
 
-static void sanitize_ascii(char *s) {
-    while (*s) {
-        unsigned char ch = (unsigned char)*s;
-        if (ch < 32 || ch > 126) {
-            *s = '?';
-        }
-        s++;
-    }
-}
-
 static void print_feature(const char *name) {
-    extern void video_print_string(const char *str);
     video_print_string(name);
     video_print_string(" ");
 }
 
-void command_info(void) {
-    extern void video_print_string(const char *str);
-    extern void video_print_number(unsigned int num);
-    extern unsigned char video_get_color(void);
-    extern void video_set_color(unsigned char fg, unsigned char bg);
-    extern void video_set_color_attr(unsigned char attr);
-
+void command_info(const char *args) {
+    (void)args;
     unsigned char old = video_get_color();
     video_set_color(9, 0);
     video_set_color_attr(old);
@@ -115,7 +104,7 @@ void command_info(void) {
     write_u32_to_bytes(d, &vendor[4]);
     write_u32_to_bytes(c, &vendor[8]);
     vendor[12] = 0;
-    sanitize_ascii(vendor);
+    lib::utils::sanitize_ascii(vendor);
 
     video_set_color(3, 0);
     video_print_string("CPU Vendor: ");
@@ -149,7 +138,7 @@ void command_info(void) {
 
         brand[48] = 0;
     }
-    sanitize_ascii(brand);
+    lib::utils::sanitize_ascii(brand);
 
     video_set_color(3, 0);
     video_print_string("CPU Brand: ");

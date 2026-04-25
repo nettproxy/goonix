@@ -1,12 +1,8 @@
-#include "../../lib/video.h"
+#include "clrtest.hpp"
+#include "../../lib/video.hpp"
 
-void command_clrtest() {
-    extern void video_print_string(const char *str);
-    extern unsigned char video_get_color(void);
-    extern void video_set_color(unsigned char fg, unsigned char bg);
-    extern void video_set_color_attr(unsigned char attr);
-    extern void video_print_string(const char *str);
-
+void command_clrtest(const char *args) {
+    (void)args;
     unsigned char old = video_get_color();
     video_set_color(VIDEO_COLOR_GREEN, VIDEO_COLOR_BLACK);
     video_print_string("Green\n");

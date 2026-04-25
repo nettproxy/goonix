@@ -1,32 +1,31 @@
-#include "shell.h"
-#include "../lib/video.h"
-#include "../lib/video.c"
-#include "../driver/keyboard/keyboard.c"
+#include "shell.hpp"
+#include "../lib/video.hpp"
+#include "../lib/video.cpp"
+#include "../lib/utils/utils.hpp"
+#include "../lib/utils/utils.cpp"
+#include "../driver/keyboard/keyboard.cpp"
 #include <stdint.h>
 #include "../lib/multiboot.h"
-
-
+#include "../commands/command.hpp"
 
 /*           commands                 */
 
-#include "../commands/clear/clear.c"
-#include "../commands/hello/hello.c"
-#include "../commands/reboot/reboot.c"
-#include "../commands/meminfo/meminfo.c"
-#include "../commands/halt/halt.c"
-#include "../commands/clrtest/clrtest.c"
-#include "../commands/info/info.c"
+#include "../commands/clear/clear.cpp"
+#include "../commands/hello/hello.cpp"
+#include "../commands/reboot/reboot.cpp"
+#include "../commands/meminfo/meminfo.cpp"
+#include "../commands/halt/halt.cpp"
+#include "../commands/clrtest/clrtest.cpp"
+#include "../commands/info/info.cpp"
+#include "../commands/help/help.cpp"
+#include "../commands/echo/echo.cpp"
+#include "../commands/commands.cpp"
 
 /*           code                     */
 
-static int string_equals(const char *a, const char *b) {
-    while (*a && *b) {
-        if (*a != *b) return 0;
-        a++; b++;
-    }
-    return *a == *b;
-}
-
+using namespace driver::keyboard;
+using namespace lib::video;
+using namespace lib::utils;
 
 void video_print_number(uint32_t num) {
     char buf[32];
@@ -74,36 +73,44 @@ void parse_memory(multiboot_info_t *mb) {
 }
 
 static void process_command(const char *cmd) {
-    if (string_equals(cmd, "clear")) {
-        command_clear();
-        return;
-    }
-    if (string_equals(cmd, "hello")) {
-        command_hello();
-        return;
-    }
-    if (string_equals(cmd, "reboot")) {
-        command_reboot();
-        return;
-    }
-    if (string_equals(cmd, "halt")) {
-        command_halt();
-        return;
-    }
-    if (string_equals(cmd, "meminfo")) {
-        command_meminfo();
-        return;
-    }
-    if (string_equals(cmd, "info")) {
-        command_info();
-        return;
-    }
-    if (string_equals(cmd, "clrtest")) {
-        command_clrtest();
-        return;
-    }
     if (*cmd != '\0') {
-        video_print_string("Gng ts command was NOT found\n");
+        char name_buf[64];
+        int name_len = 0;
+
+        const char *p = cmd;
+        while (*p == ' ') p++;
+        while (*p && *p != ' ' && name_len < (int)sizeof(name_buf) - 1) {
+            name_buf[name_len++] = *p++;
+        }
+        name_buf[name_len] = '\0';
+
+        while (*p == ' ') p++;
+        const char *args = (*p != '\0') ? p : 0;
+
+        for (int i = 0; commands[i].name; i++) {
+            if (string_equals(name_buf, commands[i].name)) {
+                commands[i].fn(args);
+                return;
+            }
+        }
+
+        const char *best = 0;
+        int best_dist = 1000000;
+        for (int i = 0; commands[i].name; i++) {
+            int d = levenshtein_distance(name_buf, commands[i].name);
+            if (d < best_dist) {
+                best_dist = d;
+                best = commands[i].name;
+            }
+        }
+
+        if (best && best_dist <= 2) {
+            video_print_string("Command not found. Did you mean '");
+            video_print_string(best);
+            video_print_string("'?\n");
+        } else {
+            video_print_string("Command not found.\n");
+        }
     }
 }
 
@@ -125,12 +132,12 @@ static void print_prompt(void) {
 void shell_init(unsigned int addr) {
     mb_info = (struct multiboot_info *)addr;
     video_init();
-    keyboard_init();
+    KeyboardDriver::init();
 }
 
 void shell_run(void) {
     video_set_color(VIDEO_COLOR_LIGHT_BLUE, VIDEO_COLOR_BLACK);
-    video_print_string("   ___               _     \n  / __|___  ___ _ _ (_)_ __\n | (_ / _ \/ _ \\ ' \\| \\ \\ /\n  \\___\\___/\\___/_||_|_/\\_\\\n                           \n");
+    video_print_string("   ___               _     \n  / __|___  ___ _ _ (_)_ __\n | (_ / _ \\/ _ \\\\ ' \\| \\\\ \\\\ /\n  \\\\___\\\\___/\\\\___/_||_|_/\\\\_\\\\\n                           \n");
     video_set_color_attr(VIDEO_COLOR_WHITE);
     video_set_color(VIDEO_COLOR_LIGHT_GREEN, VIDEO_COLOR_BLACK);
     video_print_string("Developed by Carti from scratch");
@@ -158,7 +165,7 @@ void shell_run(void) {
             video_draw_cursor(cursor_visible);
         }
 
-        unsigned char key = keyboard_get_key();
+        unsigned char key = KeyboardDriver::get_key();
         if (key == 0) {
             continue;
         }
@@ -173,9 +180,6 @@ void shell_run(void) {
             process_command(buffer);
             length = 0;
             buffer_cursor = 0;
-            if (video_get_cursor_pos() >= 80 * 25) {
-                video_clear_screen();
-            }
             print_prompt();
             line_start = video_get_cursor_pos();
             continue;
