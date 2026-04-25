@@ -108,7 +108,18 @@ static void process_command(const char *cmd) {
 }
 
 static void print_prompt(void) {
-    video_print_string("> ");
+    unsigned char old = video_get_color();
+
+    video_set_color(VIDEO_COLOR_LIGHT_BLUE, VIDEO_COLOR_BLACK);
+    video_print_string("root");
+    video_set_color(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLACK);
+    video_print_string("@");
+    video_set_color(VIDEO_COLOR_LIGHT_GREEN, VIDEO_COLOR_BLACK);
+    video_print_string("Goonix");
+    video_set_color(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLACK);
+    video_print_string(" # ");
+
+    video_set_color_attr(old);
 }
 
 void shell_init(unsigned int addr) {

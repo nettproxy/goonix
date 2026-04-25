@@ -24,38 +24,32 @@ void command_meminfo(void) {
 
     unsigned char old_color = video_get_color();
 
-    video_set_color(2, 0);
+    video_set_color(15, 0);
     video_print_string("Total Memory: ");
     if (total_mb != 0) {
+        video_set_color(10, 0);
         video_print_number(total_mb);
-        video_print_string("MB\n");
+        video_print_string(" MB\n");
     } else {
         unsigned int total_kb = (unsigned int)(total_memory >> 10);
+        video_set_color(10, 0);
         video_print_number(total_kb);
-        video_print_string("KB\n");
+        video_print_string(" KB\n");
     }
 
-    video_set_color(4, 0);
+    video_set_color(15, 0);
     video_print_string("Used Memory: ");
     if (used_mb != 0) {
+        video_set_color(10, 0);
         video_print_number(used_mb);
-        video_print_string("MB\n");
+        video_print_string(" MB\n");
     } else {
         unsigned int used_kb = (unsigned int)(kernel_bytes >> 10);
+        video_set_color(10, 0);
         video_print_number(used_kb);
-        video_print_string("KB\n");
+        video_print_string(" KB\n");
     }
 
     video_set_color(1, 0);
-    video_print_string("Reserved Memory: ");
-    if (reserved_mb != 0) {
-        video_print_number(reserved_mb);
-        video_print_string("MB\n");
-    } else {
-        unsigned int reserved_kb = (unsigned int)(reserved_memory >> 10);
-        video_print_number(reserved_kb);
-        video_print_string("KB\n");
-    }
-
     video_set_color_attr(old_color);
 }
