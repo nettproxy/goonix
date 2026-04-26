@@ -13,6 +13,7 @@
 #include "help/help.hpp"
 #include "echo/echo.hpp"
 #include "info/info.hpp"
+#include "cpustate/cpustate.hpp"
 
 using namespace lib::utils;
 using namespace lib::video;
@@ -28,5 +29,6 @@ Command commands[] = {
     {"clrtest", command_clrtest, "Print color test lines"},
     {"echo", command_echo, "Print a string"},
     {"random", command_random, "Test"},
+    {"cpustate", command_cpustate, "Display CPU registers and state"},
     {0, 0, 0}
 };

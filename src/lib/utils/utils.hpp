@@ -9,6 +9,7 @@ int string_length(const char *s);
 int min3_int(int a, int b, int c);
 int levenshtein_distance(const char *a, const char *b);
 void sanitize_ascii(char *s);
+void int_to_hex(unsigned int n, char *buf);
 
 } // namespace utils
 } // namespace lib

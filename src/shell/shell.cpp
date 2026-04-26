@@ -21,6 +21,7 @@
 #include "../commands/info/info.cpp"
 #include "../commands/help/help.cpp"
 #include "../commands/echo/echo.cpp"
+#include "../commands/cpustate/cpustate.cpp"
 #include "../commands/commands.cpp"
 
 /*           code                     */
