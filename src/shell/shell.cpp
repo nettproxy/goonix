@@ -4,6 +4,7 @@
 #include "../lib/utils/utils.hpp"
 #include "../lib/utils/utils.cpp"
 #include "../driver/keyboard/keyboard.cpp"
+#include "../driver/graphics/graphics.cpp"
 #include <stdint.h>
 #include "../lib/multiboot.h"
 #include "../commands/command.hpp"
@@ -134,6 +135,7 @@ void shell_init(unsigned int addr) {
     mb_info = (struct multiboot_info *)addr;
     video_init();
     KeyboardDriver::init();
+    driver::graphics::GraphicsDriver::init();
 }
 
 void shell_run(void) {

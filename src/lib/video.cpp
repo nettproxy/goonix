@@ -7,16 +7,22 @@ static unsigned short *video_memory = (unsigned short*)0xB8000;
 static int cursor_position = 0;
 static unsigned char video_color = 0x07;
 
+static const int SCREEN_WIDTH  = 80;
+static const int SCREEN_HEIGHT = 25;
+
+int get_screen_width()  { return SCREEN_WIDTH; }
+int get_screen_height() { return SCREEN_HEIGHT; }
+
 static void scroll_up() {
     // Scroll all lines up by one
-    for (int i = 0; i < 80 * 24; i++) {
-        video_memory[i] = video_memory[i + 80];
+    for (int i = 0; i < SCREEN_WIDTH * (SCREEN_HEIGHT - 1); i++) {
+        video_memory[i] = video_memory[i + SCREEN_WIDTH];
     }
     // Clear the bottom line
-    for (int i = 80 * 24; i < 80 * 25; i++) {
+    for (int i = SCREEN_WIDTH * (SCREEN_HEIGHT - 1); i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
         video_memory[i] = (unsigned short)(' ') | ((unsigned short)video_color << 8);
     }
-    cursor_position -= 80;
+    cursor_position -= SCREEN_WIDTH;
 }
 
 unsigned char get_color() {
