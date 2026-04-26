@@ -41,6 +41,8 @@ void GraphicsDriver::detect_gpu() {
             gpu_name = "NVIDIA Graphics Card";
           else if (vendor == 0x1002)
             gpu_name = "AMD/ATI Graphics Card";
+          else if (vendor == 0x15AD)
+            gpu_name = "VMWare Graphics Card";
           else if (vendor == 0x8086)
             gpu_name = "Intel Graphics Controller";
           else
